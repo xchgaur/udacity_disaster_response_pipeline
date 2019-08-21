@@ -1,16 +1,64 @@
 import sys
+import pandas as pd
+import numpy as np
+from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    """
+    This will load the data from two csv files
+    and will merge them into a dataframe
+    args:
+        messages_filepath: path of disaster messages csv file
+        categories_filepath: path of disaster categpries csv file
+    return:
+        dataframe with merged values
+    """
+    messages = pd.read_csv(messages_filepath)
+    messages = messages.drop_duplicates()
+    print(messages.head())
+
+    categories = pd.read_csv(categories_filepath)
+    categories = categories.drop_duplicates()
+    print(categories.head())
+
+    df = messages.merge(categories, on ='id', how='left')
+    print(df.tail())
+    print(df.shape)
+    return df
 
 
 def clean_data(df):
-    pass
+    """
+    This will clean and transform the data so that teh catgeories
+    are well separated into ditinct columns with corresponding values
+    args:
+        df: input dataframe
+    return:
+        df: transformed dataframe
+    """
+    labels = df['categories'].str.split(';', expand=True)
+    labels.columns = labels.iloc[1].apply(lambda x: x.split('-')[0])
+    for col in labels.columns:
+        labels[col] = labels[col].apply(lambda x: int(x.split('-')[1]))
+    print(labels.columns)
+    print(labels.head())
+    df = df.drop('categories', axis=1)
+    df = pd.concat([df,labels], axis = 1)
+    df = df.drop_duplicates(subset = ['message'])
+    print(df.head())
+    return df
 
 
 def save_data(df, database_filename):
-    pass  
+    """
+    This will push the dataframe data into database
+    args:
+        df: input dataframe
+        database_filename: sqlite database file
+    """
+    engine = create_engine('sqlite:///'+database_filename)
+    df.to_sql('disaster_pipeline', engine, index=False)
 
 
 def main():
