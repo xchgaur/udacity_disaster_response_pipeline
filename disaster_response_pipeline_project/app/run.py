@@ -48,6 +48,22 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     print("Genre counts: \n {}".format(genre_counts))
     genre_names = list(genre_counts.index)
+
+    print(genre_names)
+    
+    data = df.iloc[:, 4:].drop('child_alone', axis=1)
+    related_counts = data.related.value_counts().tolist()
+    print(related_counts)
+    
+    related_messages = df.groupby('related').count()['message']
+    related_categories = list(related_messages.index)
+    print(related_categories)
+    
+    categories_data = df[df.columns[5:]]
+    cat_count = categories_data.mean()*df.shape[0]
+    cat_count
+    categories = list(cat_count.index)
+    categories
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
@@ -67,6 +83,42 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=['related', 'not-related', 'others'],
+                    y=related_messages
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Related messages',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=categories,
+                    y=cat_count
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
